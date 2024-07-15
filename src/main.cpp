@@ -32,9 +32,9 @@
 #define buffer 10   //Numero di campioni per filtri interni celle di carico
 #define wait_time 1    //Numero di secondi di attesa per misura finale
 #define discharge_time 1   //Numero di secondi oltre i quali siamo certi che il carrello sia stato scaricato
-#define err_perc 10 //Distaccamento percentuale dalla misura di riferimento per il controllo di corretto funzionamento delle celle\
+#define err_perc 10 //Distaccamento percentuale dalla misura di riferimento per il controllo di corretto funzionamento delle celle
 // Tag per il logging
-static const char *TAG = "MODBUS_SLAVE";
+static const char *SLAVE_TAG = "MODBUS_SLAVE";
 
 static portMUX_TYPE param_lock = portMUX_INITIALIZER_UNLOCKED;  //?????
 
@@ -44,7 +44,7 @@ int err=0;
 extern "C" void app_main(void)
 {
     init_Daisy();
-
+    esp_log_level_set(SLAVE_TAG, ESP_LOG_INFO);
     // Configurazione della porta UART per la comunicazione Modbus
     uart_config_t uart_config = {
         .baud_rate = MB_DEV_SPEED,
@@ -66,34 +66,34 @@ extern "C" void app_main(void)
 
     // Inizializza il controller Modbus
     void *handler = NULL;
-    mb_communication_info_t comm_info = {
-        .comm_mode = MB_MODE_RTU,
-        .slave_addr = MB_SLAVE_ADDR,
-        .port = MB_PORT_NUM,
-        .baudrate = MB_DEV_SPEED,
-        .parity = MB_PARITY,
-    };
+    mb_communication_info_t comm_info;
+    
+    comm_info.mode = MB_MODE_RTU;
+    comm_info.slave_addr = MB_SLAVE_ADDR;
+    comm_info.port = MB_PORT_NUM;
+    comm_info.baudrate = MB_DEV_SPEED;
+    comm_info.parity = MB_PARITY;
 
-    mb_register_area_descriptor_t reg_area_holding = {
-        .type = MB_PARAM_HOLDING,
-        .start_offset = 0,
-        .address = (void *)&holding_reg_params[0],
-        .size = sizeof(holding_reg_params),
-    };
 
-    mb_register_area_descriptor_t reg_area_coils = {
-        .type = MB_PARAM_COIL,
-        .start_offset = 0,
-        .address = (void *)&coil_reg_params[0],
-        .size = sizeof(coil_reg_params),
-    };
+    mb_register_area_descriptor_t reg_area_holding;
+    reg_area_holding.type = MB_PARAM_HOLDING;
+    reg_area_holding.start_offset = 0;
+    reg_area_holding.address = (void *)&holding_reg_params[0];
+    reg_area_holding.size = sizeof(holding_reg_params);
 
-    mb_register_area_descriptor_t reg_area_number_of_scales = {
-        .type = MB_PARAM_HOLDING,
-        .start_offset = MAX_SCALES * sizeof(holding_reg_params_t),
-        .address = (void *)&number_of_scales,
-        .size = sizeof(number_of_scales),
-    };
+    mb_register_area_descriptor_t reg_area_coils;
+    reg_area_coils.type = MB_PARAM_COIL;
+    reg_area_coils.start_offset = 0;
+    reg_area_coils.address = (void *)&coil_reg_params[0];
+    reg_area_coils.size = sizeof(coil_reg_params);
+
+
+    mb_register_area_descriptor_t reg_area_number_of_scales;
+    reg_area_number_of_scales.type = MB_PARAM_HOLDING;
+    reg_area_number_of_scales.start_offset = MAX_SCALES * sizeof(holding_reg_params_t);
+    reg_area_number_of_scales.address = (void *)&number_of_scales;
+    reg_area_number_of_scales.size = sizeof(number_of_scales);
+
 
     // Inizializza il controller Modbus
     ESP_ERROR_CHECK(mbcontroller_init(&comm_info, &handler));
