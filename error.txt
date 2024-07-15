@@ -1,0 +1,346 @@
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/denky32.html
+PLATFORM: Espressif 32 (6.4.0) > Denky32 (WROOM32)
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-espidf @ 3.40402.0 (4.4.2) 
+ - tool-cmake @ 3.16.4 
+ - tool-esptoolpy @ 1.40201.0 (4.2.1) 
+ - tool-idf @ 1.0.1 
+ - tool-ninja @ 1.7.1 
+ - tool-riscv32-esp-elf-gdb @ 12.1.0+20221002 
+ - tool-xtensa-esp-elf-gdb @ 12.1.0+20221002 
+ - toolchain-esp32ulp @ 1.22851.191205 (2.28.51) 
+ - toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch3
+Reading CMake configuration...
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 4 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- COND
+|-- DAISY
+|-- HX711
+|-- MODBUS
+Building in release mode
+Compiling .pio/build/denky32/src/main.o
+Archiving .pio/build/denky32/esp-idf/app_trace/libapp_trace.a
+Indexing .pio/build/denky32/esp-idf/app_trace/libapp_trace.a
+Archiving .pio/build/denky32/esp-idf/app_update/libapp_update.a
+Indexing .pio/build/denky32/esp-idf/app_update/libapp_update.a
+src/main.cpp:35:21: error: multi-line comment [-Werror=comment]
+ #define err_perc 10 //Distaccamento percentuale dalla misura di riferimento per il controllo di corretto funzionamento delle celle\
+                     ^
+src/main.cpp: In function 'void app_main()':
+src/main.cpp:56:5: warning: missing initializer for member 'uart_config_t::rx_flow_ctrl_thresh' [-Wmissing-field-initializers]
+     };
+     ^
+src/main.cpp:75:5: error: 'mb_communication_info_t' has no non-static data member named 'comm_mode'
+     };
+     ^
+src/main.cpp:82:5: warning: missing initializer for member 'mb_register_area_descriptor_t::start_offset' [-Wmissing-field-initializers]
+     };
+     ^
+src/main.cpp:82:5: warning: missing initializer for member 'mb_register_area_descriptor_t::address' [-Wmissing-field-initializers]
+src/main.cpp:82:5: warning: missing initializer for member 'mb_register_area_descriptor_t::size' [-Wmissing-field-initializers]
+src/main.cpp:82:5: error: designator order for field 'mb_register_area_descriptor_t::start_offset' does not match declaration order in 'mb_register_area_descriptor_t'
+src/main.cpp:89:5: warning: missing initializer for member 'mb_register_area_descriptor_t::start_offset' [-Wmissing-field-initializers]
+     };
+     ^
+src/main.cpp:89:5: warning: missing initializer for member 'mb_register_area_descriptor_t::address' [-Wmissing-field-initializers]
+src/main.cpp:89:5: warning: missing initializer for member 'mb_register_area_descriptor_t::size' [-Wmissing-field-initializers]
+src/main.cpp:89:5: error: designator order for field 'mb_register_area_descriptor_t::start_offset' does not match declaration order in 'mb_register_area_descriptor_t'
+src/main.cpp:94:29: error: 'number_of_scales' was not declared in this scope
+         .address = (void *)&number_of_scales,
+                             ^~~~~~~~~~~~~~~~
+src/main.cpp:94:29: note: suggested alternative: 'reg_area_number_of_scales'
+         .address = (void *)&number_of_scales,
+                             ^~~~~~~~~~~~~~~~
+                             reg_area_number_of_scales
+In file included from src/main.cpp:12:
+src/main.cpp:99:21: error: 'mbcontroller_init' was not declared in this scope
+     ESP_ERROR_CHECK(mbcontroller_init(&comm_info, &handler));
+                     ^~~~~~~~~~~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
+         esp_err_t err_rc_ = (x);                                        \
+                              ^
+src/main.cpp:99:21: note: suggested alternative: 'mbc_master_init'
+     ESP_ERROR_CHECK(mbcontroller_init(&comm_info, &handler));
+                     ^~~~~~~~~~~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
+         esp_err_t err_rc_ = (x);                                        \
+                              ^
+src/main.cpp:102:21: error: 'mbcontroller_set_descriptor' was not declared in this scope
+     ESP_ERROR_CHECK(mbcontroller_set_descriptor(handler, &reg_area_holding));
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
+         esp_err_t err_rc_ = (x);                                        \
+                              ^
+Archiving .pio/build/denky32/esp-idf/asio/libasio.a
+src/main.cpp:102:21: note: suggested alternative: 'mbc_master_set_descriptor'
+     ESP_ERROR_CHECK(mbcontroller_set_descriptor(handler, &reg_area_holding));
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
+         esp_err_t err_rc_ = (x);                                        \
+                              ^
+src/main.cpp:103:21: error: 'mbcontroller_set_descriptor' was not declared in this scope
+     ESP_ERROR_CHECK(mbcontroller_set_descriptor(handler, &reg_area_coils));
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
+         esp_err_t err_rc_ = (x);                                        \
+                              ^
+Indexing .pio/build/denky32/esp-idf/asio/libasio.a
+src/main.cpp:103:21: note: suggested alternative: 'mbc_master_set_descriptor'
+     ESP_ERROR_CHECK(mbcontroller_set_descriptor(handler, &reg_area_coils));
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
+         esp_err_t err_rc_ = (x);                                        \
+                              ^
+src/main.cpp:104:21: error: 'mbcontroller_set_descriptor' was not declared in this scope
+     ESP_ERROR_CHECK(mbcontroller_set_descriptor(handler, &reg_area_number_of_scales));
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
+         esp_err_t err_rc_ = (x);                                        \
+                              ^
+src/main.cpp:104:21: note: suggested alternative: 'mbc_master_set_descriptor'
+     ESP_ERROR_CHECK(mbcontroller_set_descriptor(handler, &reg_area_number_of_scales));
+                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
+         esp_err_t err_rc_ = (x);                                        \
+                              ^
+src/main.cpp:107:21: error: 'mbcontroller_start' was not declared in this scope
+     ESP_ERROR_CHECK(mbcontroller_start(handler));
+                     ^~~~~~~~~~~~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
+         esp_err_t err_rc_ = (x);                                        \
+                              ^
+src/main.cpp:107:21: note: suggested alternative: 'mbc_master_start'
+     ESP_ERROR_CHECK(mbcontroller_start(handler));
+                     ^~~~~~~~~~~~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
+         esp_err_t err_rc_ = (x);                                        \
+                              ^
+src/main.cpp:129:24: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+     holding_reg_params.diagnostic=0;
+                        ^~~~~~~~~~
+src/main.cpp:130:24: error: request for member 'connection_dummy' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+     holding_reg_params.connection_dummy=1;
+                        ^~~~~~~~~~~~~~~~
+src/main.cpp:183:29: error: request for member 'coil_PresenceStatus' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+             coil_reg_params.coil_PresenceStatus = !gpio_get_level(avvio_lettura);
+                             ^~~~~~~~~~~~~~~~~~~
+src/main.cpp:187:28: error: request for member 'coil_TareCommand' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+         if(coil_reg_params.coil_TareCommand==1) {
+                            ^~~~~~~~~~~~~~~~
+src/main.cpp:189:33: error: request for member 'coil_LastCommandSuccess' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+                 coil_reg_params.coil_LastCommandSuccess=0;
+                                 ^~~~~~~~~~~~~~~~~~~~~~~
+src/main.cpp:193:33: error: request for member 'coil_LastCommandSuccess' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+                 coil_reg_params.coil_LastCommandSuccess=1;
+                                 ^~~~~~~~~~~~~~~~~~~~~~~
+src/main.cpp:197:28: error: request for member 'coil_CalibCommand' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+         if(coil_reg_params.coil_CalibCommand==1) {
+                            ^~~~~~~~~~~~~~~~~
+src/main.cpp:199:33: error: request for member 'coil_LastCommandSuccess' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+                 coil_reg_params.coil_LastCommandSuccess=0;
+Compiling .pio/build/denky32/bootloader_support/src/bootloader_common.o
+                                 ^~~~~~~~~~~~~~~~~~~~~~~
+src/main.cpp:200:48: error: request for member 'holding_pesoCalibMS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                 pesoCalib = holding_reg_params.holding_pesoCalibMS*(2^16) + holding_reg_params.holding_pesoCalibLS;
+                                                ^~~~~~~~~~~~~~~~~~~
+src/main.cpp:200:96: error: request for member 'holding_pesoCalibLS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                 pesoCalib = holding_reg_params.holding_pesoCalibMS*(2^16) + holding_reg_params.holding_pesoCalibLS;
+                                                                                                ^~~~~~~~~~~~~~~~~~~
+src/main.cpp:204:33: error: request for member 'coil_LastCommandSuccess' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+                 coil_reg_params.coil_LastCommandSuccess=1;
+                                 ^~~~~~~~~~~~~~~~~~~~~~~
+src/main.cpp:208:28: error: request for member 'coil_CalibCommand' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+         if(coil_reg_params.coil_CalibCommand==1) {
+                            ^~~~~~~~~~~~~~~~~
+src/main.cpp:223:44: error: request for member 'holding_cell1LS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.holding_cell1LS=uint16_t(cell1_data);
+                                            ^~~~~~~~~~~~~~~
+src/main.cpp:224:44: error: request for member 'holding_cell1MS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.holding_cell1MS=cell1_data>>16;
+                                            ^~~~~~~~~~~~~~~
+src/main.cpp:225:44: error: request for member 'holding_cell2LS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.holding_cell2LS=uint16_t(cell2_data);
+                                            ^~~~~~~~~~~~~~~
+src/main.cpp:226:44: error: request for member 'holding_cell2MS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.holding_cell2MS=cell2_data>>16;
+                                            ^~~~~~~~~~~~~~~
+src/main.cpp:227:44: error: request for member 'holding_cell3LS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.holding_cell3LS=uint16_t(cell3_data);
+                                            ^~~~~~~~~~~~~~~
+src/main.cpp:228:44: error: request for member 'holding_cell3MS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.holding_cell3MS=cell3_data>>16;
+                                            ^~~~~~~~~~~~~~~
+src/main.cpp:229:44: error: request for member 'holding_cell4LS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.holding_cell4LS=uint16_t(cell4_data);
+                                            ^~~~~~~~~~~~~~~
+src/main.cpp:230:44: error: request for member 'holding_cell4MS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.holding_cell4MS=cell4_data>>16;
+                                            ^~~~~~~~~~~~~~~
+src/main.cpp:231:44: error: request for member 'holding_pesoTotLS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.holding_pesoTotLS=uint16_t(pesoTot_data);
+                                            ^~~~~~~~~~~~~~~~~
+src/main.cpp:232:44: error: request for member 'holding_pesoTotMS' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.holding_pesoTotMS=pesoTot_data>>16;
+                                            ^~~~~~~~~~~~~~~~~
+src/main.cpp:233:44: error: request for member 'count' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.count=holding_reg_params.count+1;
+                                            ^~~~~
+src/main.cpp:233:69: error: request for member 'count' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         holding_reg_params.count=holding_reg_params.count+1;
+                                                                     ^~~~~
+src/main.cpp:235:72: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         if(bilancia->check_adcs(0)) holding_reg_params.diagnostic |= 1UL << 0;
+                                                                        ^~~~~~~~~~
+src/main.cpp:236:49: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         else holding_reg_params.diagnostic &= ~(1UL << 0);
+                                                 ^~~~~~~~~~
+src/main.cpp:237:72: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         if(bilancia->check_adcs(1)) holding_reg_params.diagnostic |= 1UL << 1;
+                                                                        ^~~~~~~~~~
+src/main.cpp:238:49: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         else holding_reg_params.diagnostic &= ~(1UL << 1);
+                                                 ^~~~~~~~~~
+src/main.cpp:239:72: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         if(bilancia->check_adcs(2)) holding_reg_params.diagnostic |= 1UL << 2;
+                                                                        ^~~~~~~~~~
+src/main.cpp:240:49: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         else holding_reg_params.diagnostic &= ~(1UL << 2);
+                                                 ^~~~~~~~~~
+src/main.cpp:241:72: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         if(bilancia->check_adcs(3)) holding_reg_params.diagnostic |= 1UL << 3;
+                                                                        ^~~~~~~~~~
+src/main.cpp:242:49: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         else holding_reg_params.diagnostic &= ~(1UL << 3);
+                                                 ^~~~~~~~~~
+src/main.cpp:243:65: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         if(!mem->systemOK()) holding_reg_params.diagnostic |= 1UL << 4;
+                                                                 ^~~~~~~~~~
+src/main.cpp:244:49: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                         else holding_reg_params.diagnostic &= ~(1UL << 4);
+                                                 ^~~~~~~~~~
+src/main.cpp:247:29: error: invalid conversion from 'const char*' to 'char' [-fpermissive]
+                     stato = "A";
+                             ^~~
+src/main.cpp:248:37: error: request for member 'coil_CalibCommand' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+                     coil_reg_params.coil_CalibCommand=0;
+                                     ^~~~~~~~~~~~~~~~~
+src/main.cpp:249:37: error: request for member 'coil_LastCommandSuccess' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+                     coil_reg_params.coil_LastCommandSuccess=1;
+                                     ^~~~~~~~~~~~~~~~~~~~~~~
+src/main.cpp:253:98: error: request for member 'coil_PresenceStatus' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+         if(checkCells==1 && difftime(time(NULL), tStart_check)>discharge_time && coil_reg_params.coil_PresenceStatus==0) {
+                                                                                                  ^~~~~~~~~~~~~~~~~~~
+src/main.cpp:259:37: error: request for member 'coil_CellStatus' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+                     coil_reg_params.coil_CellStatus = 1;
+                                     ^~~~~~~~~~~~~~~
+src/main.cpp:260:60: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                     if(result_cells==1) holding_reg_params.diagnostic |= 1UL << 5;
+                                                            ^~~~~~~~~~
+src/main.cpp:261:45: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                     else holding_reg_params.diagnostic &= ~(1UL << 5);
+                                             ^~~~~~~~~~
+src/main.cpp:262:60: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                     if(result_cells==2) holding_reg_params.diagnostic |= 1UL << 6;
+                                                            ^~~~~~~~~~
+src/main.cpp:263:45: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                     else holding_reg_params.diagnostic &= ~(1UL << 6);
+                                             ^~~~~~~~~~
+src/main.cpp:264:60: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                     if(result_cells==3) holding_reg_params.diagnostic |= 1UL << 7;
+                                                            ^~~~~~~~~~
+src/main.cpp:265:45: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                     else holding_reg_params.diagnostic &= ~(1UL << 7);
+                                             ^~~~~~~~~~
+src/main.cpp:266:60: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                     if(result_cells==4) holding_reg_params.diagnostic |= 1UL << 8;
+                                                            ^~~~~~~~~~
+src/main.cpp:267:45: error: request for member 'diagnostic' in 'holding_reg_params', which is of non-class type 'holding_reg_params_t [6]'
+                     else holding_reg_params.diagnostic &= ~(1UL << 8);
+                                             ^~~~~~~~~~
+src/main.cpp:271:37: error: request for member 'coil_CellStatus' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+                     coil_reg_params.coil_CellStatus = 0;
+                                     ^~~~~~~~~~~~~~~
+src/main.cpp:279:37: error: request for member 'coil_AdcsStatus' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+                     coil_reg_params.coil_AdcsStatus = 1;
+                                     ^~~~~~~~~~~~~~~
+src/main.cpp:283:37: error: request for member 'coil_AdcsStatus' in 'coil_reg_params', which is of non-class type 'coil_reg_params_t [6]'
+                     coil_reg_params.coil_AdcsStatus = 0;
+                                     ^~~~~~~~~~~~~~~
+src/main.cpp:118:13: warning: unused variable 'imbalanceLimit' [-Wunused-variable]
+     int32_t imbalanceLimit = 0;
+             ^~~~~~~~~~~~~~
+src/main.cpp:119:13: warning: unused variable 'maximumLimit' [-Wunused-variable]
+     int32_t maximumLimit = 0;
+             ^~~~~~~~~~~~
+src/main.cpp:120:14: warning: unused variable 'storeID' [-Wunused-variable]
+     uint16_t storeID = 0;
+              ^~~~~~~
+src/main.cpp:121:14: warning: unused variable 'workplaceID' [-Wunused-variable]
+     uint16_t workplaceID = 0;
+              ^~~~~~~~~~~
+In file included from /home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_check.h:17,
+                 from /home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/freemodbus/common/include/esp_modbus_common.h:26,
+                 from /home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/freemodbus/common/include/esp_modbus_master.h:22,
+                 from /home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/freemodbus/common/include/mbcontroller.h:29,
+                 from src/main.cpp:13:
+src/main.cpp: At global scope:
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/log/include/esp_log.h:442:54: error: expected unqualified-id before 'do'
+ #define ESP_LOG_LEVEL_LOCAL(level, tag, format, ...) do {               \
+                                                      ^~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/log/include/esp_log.h:353:38: note: in expansion of macro 'ESP_LOG_LEVEL_LOCAL'
+ #define ESP_LOGI( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_INFO,    tag, format, ##__VA_ARGS__)
+                                      ^~~~~~~~~~~~~~~~~~~
+src/main.cpp:292:1: note: in expansion of macro 'ESP_LOGI'
+ ESP_LOGI(SLAVE_TAG,"Modbus controller destroyed.");
+ ^~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/log/include/esp_log.h:444:7: error: expected unqualified-id before 'while'
+     } while(0)
+       ^~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/log/include/esp_log.h:353:38: note: in expansion of macro 'ESP_LOG_LEVEL_LOCAL'
+ #define ESP_LOGI( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_INFO,    tag, format, ##__VA_ARGS__)
+                                      ^~~~~~~~~~~~~~~~~~~
+src/main.cpp:292:1: note: in expansion of macro 'ESP_LOGI'
+ ESP_LOGI(SLAVE_TAG,"Modbus controller destroyed.");
+ ^~~~~~~~
+src/main.cpp:293:11: error: expected constructor, destructor, or type conversion before '(' token
+ vTaskDelay(100);
+           ^
+In file included from src/main.cpp:12:
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:115:28: error: expected unqualified-id before 'do'
+ #define ESP_ERROR_CHECK(x) do {                                         \
+                            ^~
+src/main.cpp:294:1: note: in expansion of macro 'ESP_ERROR_CHECK'
+ ESP_ERROR_CHECK(mbc_slave_destroy());
+ ^~~~~~~~~~~~~~~
+/home/lomba/.platformio/packages/framework-espidf@3.40402.0/components/esp_common/include/esp_err.h:121:7: error: expected unqualified-id before 'while'
+     } while(0)
+       ^~~~~
+src/main.cpp:294:1: note: in expansion of macro 'ESP_ERROR_CHECK'
+ ESP_ERROR_CHECK(mbc_slave_destroy());
+ ^~~~~~~~~~~~~~~
+src/main.cpp:297:1: error: 'algo' does not name a type; did you mean 'auto'?
+ algo->free_mem();
+ ^~~~
+ auto
+src/main.cpp:298:1: error: 'bilancia' does not name a type
+ bilancia->free_mem();
+ ^~~~~~~~
+src/main.cpp:299:5: error: expected constructor, destructor, or type conversion before '(' token
+ free(conds);
+     ^
+src/main.cpp:37:20: warning: 'TAG' defined but not used [-Wunused-variable]
+ static const char *TAG = "MODBUS_SLAVE";
+                    ^~~
+cc1plus: some warnings being treated as errors
+*** [.pio/build/denky32/src/main.o] Error 1
+Compiling .pio/build/denky32/bootloader_support/src/bootloader_common_loader.o
+================================================================== [FAILED] Took 2.79 seconds ==================================================================
+
+ *  The terminal process "platformio 'run'" terminated with exit code: 1. 
+ *  Terminal will be reused by tasks, press any key to close it. 
