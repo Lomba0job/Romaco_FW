@@ -227,12 +227,13 @@ extern "C" void app_main(void) {
             checkCells = 0;
         }
     }
+
+
+    ESP_LOGI(SLAVE_TAG, "Modbus controller destroyed.");
+    vTaskDelay(100);
+    ESP_ERROR_CHECK(mbc_slave_destroy());
+
+    algo->free_mem();
+    bilancia->free_mem();
+    free(conds);
 }
-
-ESP_LOGI(SLAVE_TAG, "Modbus controller destroyed.");
-vTaskDelay(100);
-ESP_ERROR_CHECK(mbc_slave_destroy());
-
-algo->free_mem();
-bilancia->free_mem();
-free(conds);
