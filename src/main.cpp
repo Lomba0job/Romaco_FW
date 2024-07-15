@@ -27,54 +27,52 @@ static const char *SLAVE_TAG = "MODBUS_SLAVE";
 static portMUX_TYPE param_lock = portMUX_INITIALIZER_UNLOCKED;
 int err = 0;
 
+void configure_modbus_slave() {
+    //-----------------------------SETUP MODBUS-----------------------------------------------------------------------------------------
+    // Initialize Modbus communication
+    mb_communication_info_t comm_info;
+    mb_register_area_descriptor_t reg_area;
+
+    esp_log_level_set(SLAVE_TAG, ESP_LOG_INFO);
+    void* mbc_slave_handler = NULL;
+    ESP_ERROR_CHECK(mbc_slave_init(MB_PORT_SERIAL_SLAVE, &mbc_slave_handler));
+
+    // Setup communication parameters
+    comm_info.mode = MB_MODE_RTU;
+    comm_info.slave_addr = MB_SLAVE_ADDR;
+    comm_info.port = MB_PORT_NUM;
+    comm_info.baudrate = MB_DEV_SPEED;
+    comm_info.parity = MB_PARITY_NONE;
+    ESP_ERROR_CHECK(mbc_slave_setup((void*)&comm_info));
+
+    // Setup register areas
+    // Setup Holding Registers
+    reg_area.type = MB_PARAM_HOLDING;
+    reg_area.start_offset = MB_REG_HOLDING_START(0);
+    reg_area.address = (void*)&holding_reg_params[0];
+    reg_area.size = sizeof(holding_reg_params_t);
+    ESP_ERROR_CHECK(mbc_slave_set_descriptor(reg_area));
+
+    // Setup Coils
+    reg_area.type = MB_PARAM_COIL;
+    reg_area.start_offset = MB_REG_COILS_START(0);
+    reg_area.address = (void*)&coil_reg_params[0];
+    reg_area.size = sizeof(coil_reg_params_t);
+    ESP_ERROR_CHECK(mbc_slave_set_descriptor(reg_area));
+
+    // Start Modbus controller
+    ESP_ERROR_CHECK(mbc_slave_start());
+
+    // UART Setting
+    ESP_ERROR_CHECK(uart_set_pin(MB_PORT_NUM, CONFIG_MB_UART_TXD, CONFIG_MB_UART_RXD, CONFIG_MB_UART_RTS, UART_PIN_NO_CHANGE));
+    ESP_ERROR_CHECK(uart_set_mode(MB_PORT_NUM, UART_MODE_RS485_HALF_DUPLEX));
+    ESP_LOGI(SLAVE_TAG, "Modbus slave stack initialized and started.");
+}
+
 extern "C" void app_main(void) {
     init_Daisy();
-    esp_log_level_set(SLAVE_TAG, ESP_LOG_INFO);
 
-    uart_config_t uart_config = {
-        .baud_rate = MB_DEV_SPEED,
-        .data_bits = UART_DATA_8_BITS,
-        .parity = MB_PARITY,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        .source_clk = UART_SCLK_APB,
-    };
-    uart_param_config(MB_PORT_NUM, &uart_config);
-    uart_set_pin(MB_PORT_NUM, CONFIG_MB_UART_TXD, CONFIG_MB_UART_RXD, CONFIG_MB_UART_RTS, UART_PIN_NO_CHANGE);
-    ESP_ERROR_CHECK(uart_driver_install(MB_PORT_NUM, 256, 256, 10, NULL, 0));
-
-    void *handler = NULL;
-    mb_communication_info_t comm_info = {
-        .mode = MB_MODE_RTU,
-        .slave_addr = MB_SLAVE_ADDR,
-        .port = MB_PORT_NUM,
-        .baudrate = MB_DEV_SPEED,
-        .parity = MB_PARITY,
-    };
-    mb_register_area_descriptor_t reg_area_holding = {
-        .type = MB_PARAM_HOLDING,
-        .start_offset = 0,
-        .address = (void *)&holding_reg_params[0],
-        .size = sizeof(holding_reg_params),
-    };
-    mb_register_area_descriptor_t reg_area_coils = {
-        .type = MB_PARAM_COIL,
-        .start_offset = 0,
-        .address = (void *)&coil_reg_params[0],
-        .size = sizeof(coil_reg_params),
-    };
-    mb_register_area_descriptor_t reg_area_number_of_scales = {
-        .type = MB_PARAM_HOLDING,
-        .start_offset = MAX_SCALES * sizeof(holding_reg_params_t),
-        .address = (void *)&number_of_scales,
-        .size = sizeof(number_of_scales),
-    };
-
-    ESP_ERROR_CHECK(mbcontroller_init(&comm_info, &handler));
-    ESP_ERROR_CHECK(mbcontroller_set_descriptor(handler, &reg_area_holding));
-    ESP_ERROR_CHECK(mbcontroller_set_descriptor(handler, &reg_area_coils));
-    ESP_ERROR_CHECK(mbcontroller_set_descriptor(handler, &reg_area_number_of_scales));
-    ESP_ERROR_CHECK(mbcontroller_start(handler));
+    configure_modbus_slave();
 
     int32_t cell1_data = 0, cell2_data = 0, cell3_data = 0, cell4_data = 0, pesoTot_data = 0;
     int32_t pesoDX = 0, pesoSX = 0, pesoCalib = 0, imbalanceLimit = 0, maximumLimit = 0;
@@ -83,8 +81,8 @@ extern "C" void app_main(void) {
     char stato = 'A';
     int wei = 0;
     time_t tStart, tStart_check;
-    holding_reg_params.diagnostic = 0;
-    holding_reg_params.connection_dummy = 1;
+    holding_reg_params[0].diagnostic = 0;
+    holding_reg_params[0].connection_dummy = 1;
 
     HX711 *cond1 = new HX711();
     cond1->init(ADC1_DATA, ADC1_CLOCK);
@@ -117,6 +115,7 @@ extern "C" void app_main(void) {
     int o = 0;
 
     while (1) {
+        // Continua il normale funzionamento
         pesoTot_data = bilancia->get_units(1);
         o = o + 1;
         cell1_data = bilancia->get_last_units(0);
@@ -127,31 +126,31 @@ extern "C" void app_main(void) {
         pesoSX = cell3_data + cell4_data;
 
         portENTER_CRITICAL(&param_lock);
-        coil_reg_params.coil_PresenceStatus = !gpio_get_level(avvio_lettura);
+        coil_reg_params[0].coil_PresenceStatus = !gpio_get_level(avvio_lettura);
         portEXIT_CRITICAL(&param_lock);
 
-        if (coil_reg_params.coil_TareCommand == 1) {
+        if (coil_reg_params[0].coil_TareCommand == 1) {
             if (prevTare == 0) {
-                coil_reg_params.coil_LastCommandSuccess = 0;
+                coil_reg_params[0].coil_LastCommandSuccess = 0;
                 bilancia->tare(times * 2);
                 printf("Tare Command requested!\n");
                 prevTare = 1;
-                coil_reg_params.coil_LastCommandSuccess = 1;
+                coil_reg_params[0].coil_LastCommandSuccess = 1;
             }
         } else prevTare = 0;
 
-        if (coil_reg_params.coil_CalibCommand == 1) {
+        if (coil_reg_params[0].coil_CalibCommand == 1) {
             if (prevCalib == 0) {
-                coil_reg_params.coil_LastCommandSuccess = 0;
-                pesoCalib = holding_reg_params.holding_pesoCalibMS * (2 ^ 16) + holding_reg_params.holding_pesoCalibLS;
+                coil_reg_params[0].coil_LastCommandSuccess = 0;
+                pesoCalib = holding_reg_params[0].holding_pesoCalibMS * (2 ^ 16) + holding_reg_params[0].holding_pesoCalibLS;
                 bilancia->calib(pesoCalib, times * 2);
                 printf("Calib Command requested!: %f\n", bilancia->get_calfact());
                 prevCalib = 1;
-                coil_reg_params.coil_LastCommandSuccess = 1;
+                coil_reg_params[0].coil_LastCommandSuccess = 1;
             }
         } else prevCalib = 0;
 
-        if (coil_reg_params.coil_CalibCommand == 1) {
+        if (coil_reg_params[0].coil_CalibCommand == 1) {
             if (stato == 'A') {
                 printf("richiesto il peso...\n");
                 tStart = time(NULL);
@@ -165,70 +164,70 @@ extern "C" void app_main(void) {
                     printf("Valore i: %d", wei);
 
                     portENTER_CRITICAL(&param_lock);
-                    holding_reg_params.holding_cell1LS = uint16_t (cell1_data);
-                    holding_reg_params.holding_cell1MS = cell1_data >> 16;
-                    holding_reg_params.holding_cell2LS = uint16_t(cell2_data);
-                    holding_reg_params.holding_cell2MS = cell2_data >> 16;
-                    holding_reg_params.holding_cell3LS = uint16_t(cell3_data);
-                    holding_reg_params.holding_cell3MS = cell3_data >> 16;
-                    holding_reg_params.holding_cell4LS = uint16_t(cell4_data);
-                    holding_reg_params.holding_cell4MS = cell4_data >> 16;
-                    holding_reg_params.holding_pesoTotLS = uint16_t(pesoTot_data);
-                    holding_reg_params.holding_pesoTotMS = pesoTot_data >> 16;
-                    holding_reg_params.count = holding_reg_params.count + 1;
-                                    if (bilancia->check_adcs(0)) holding_reg_params.diagnostic |= 1UL << 0;
-                else holding_reg_params.diagnostic &= ~(1UL << 0);
-                    if (bilancia->check_adcs(1)) holding_reg_params.diagnostic |= 1UL << 1;
-                    else holding_reg_params.diagnostic &= ~(1UL << 1);
-                    if (bilancia->check_adcs(2)) holding_reg_params.diagnostic |= 1UL << 2;
-                    else holding_reg_params.diagnostic &= ~(1UL << 2);
-                    if (bilancia->check_adcs(3)) holding_reg_params.diagnostic |= 1UL << 3;
-                    else holding_reg_params.diagnostic &= ~(1UL << 3);
-                    if (!mem->systemOK()) holding_reg_params.diagnostic |= 1UL << 4;
-                    else holding_reg_params.diagnostic &= ~(1UL << 4);
+                    holding_reg_params[0].holding_cell1LS = uint16_t (cell1_data);
+                    holding_reg_params[0].holding_cell1MS = cell1_data >> 16;
+                    holding_reg_params[0].holding_cell2LS = uint16_t(cell2_data);
+                    holding_reg_params[0].holding_cell2MS = cell2_data >> 16;
+                    holding_reg_params[0].holding_cell3LS = uint16_t(cell3_data);
+                    holding_reg_params[0].holding_cell3MS = cell3_data >> 16;
+                    holding_reg_params[0].holding_cell4LS = uint16_t(cell4_data);
+                    holding_reg_params[0].holding_cell4MS = cell4_data >> 16;
+                    holding_reg_params[0].holding_pesoTotLS = uint16_t(pesoTot_data);
+                    holding_reg_params[0].holding_pesoTotMS = pesoTot_data >> 16;
+                    holding_reg_params[0].count = holding_reg_params[0].count + 1;
+                    if (bilancia->check_adcs(0)) holding_reg_params[0].diagnostic |= 1UL << 0;
+                    else holding_reg_params[0].diagnostic &= ~(1UL << 0);
+                    if (bilancia->check_adcs(1)) holding_reg_params[0].diagnostic |= 1UL << 1;
+                    else holding_reg_params[0].diagnostic &= ~(1UL << 1);
+                    if (bilancia->check_adcs(2)) holding_reg_params[0].diagnostic |= 1UL << 2;
+                    else holding_reg_params[0].diagnostic &= ~(1UL << 2);
+                    if (bilancia->check_adcs(3)) holding_reg_params[0].diagnostic |= 1UL << 3;
+                    else holding_reg_params[0].diagnostic &= ~(1UL << 3);
+                    if (!mem->systemOK()) holding_reg_params[0].diagnostic |= 1UL << 4;
+                    else holding_reg_params[0].diagnostic &= ~(1UL << 4);
                     portEXIT_CRITICAL(&param_lock);
-
-                stato = "A";
-                coil_reg_params.coil_CalibCommand = 0;
-                coil_reg_params.coil_LastCommandSuccess = 1;
+                    stato = "A";
+                    coil_reg_params[0].coil_CalibCommand = 0;
+                    coil_reg_params[0].coil_LastCommandSuccess = 1;
+                }
             }
         }
-    }
-    if (checkCells == 1 && difftime(time(NULL), tStart_check) > discharge_time && coil_reg_params.coil_PresenceStatus == 0) {
-        printf("Controllando stato celle\n");
-        unsigned int result_cells = bilancia->check_loadCells(err_perc);
-        if (result_cells > 0) {
-            printf("Errore celle\n");
-            portENTER_CRITICAL(&param_lock);
-            coil_reg_params.coil_CellStatus = 1;
-            if (result_cells == 1) holding_reg_params.diagnostic |= 1UL << 5;
-            else holding_reg_params.diagnostic &= ~(1UL << 5);
-            if (result_cells == 2) holding_reg_params.diagnostic |= 1UL << 6;
-            else holding_reg_params.diagnostic &= ~(1UL << 6);
-            if (result_cells == 3) holding_reg_params.diagnostic |= 1UL << 7;
-            else holding_reg_params.diagnostic &= ~(1UL << 7);
-            if (result_cells == 4) holding_reg_params.diagnostic |= 1UL << 8;
-            else holding_reg_params.diagnostic &= ~(1UL << 8);
-            portEXIT_CRITICAL(&param_lock);
-        } else {
-            portENTER_CRITICAL(&param_lock);
-            coil_reg_params.coil_CellStatus = 0;
-            portEXIT_CRITICAL(&param_lock);
+        if (checkCells == 1 && difftime(time(NULL), tStart_check) > discharge_time && coil_reg_params[0].coil_PresenceStatus == 0) {
+            printf("Controllando stato celle\n");
+            unsigned int result_cells = bilancia->check_loadCells(err_perc);
+            if (result_cells > 0) {
+                printf("Errore celle\n");
+                portENTER_CRITICAL(&param_lock);
+                coil_reg_params[0].coil_CellStatus = 1;
+                if (result_cells == 1) holding_reg_params[0].diagnostic |= 1UL << 5;
+                else holding_reg_params[0].diagnostic &= ~(1UL << 5);
+                if (result_cells == 2) holding_reg_params[0].diagnostic |= 1UL << 6;
+                else holding_reg_params[0].diagnostic &= ~(1UL << 6);
+                if (result_cells == 3) holding_reg_params[0].diagnostic |= 1UL << 7;
+                else holding_reg_params[0].diagnostic &= ~(1UL << 7);
+                if (result_cells == 4) holding_reg_params[0].diagnostic |= 1UL << 8;
+                else holding_reg_params[0].diagnostic &= ~(1UL << 8);
+                portEXIT_CRITICAL(&param_lock);
+            } else {
+                portENTER_CRITICAL(&param_lock);
+                coil_reg_params[0].coil_CellStatus = 0;
+                portEXIT_CRITICAL(&param_lock);
+            }
+            printf("Controllando stato adcs\n");
+            unsigned int result_adcs = bilancia->check_adcs();
+            if (result_adcs > 0) {
+                printf("Errore adcs\n");
+                portENTER_CRITICAL(&param_lock);
+                coil_reg_params[0].coil_AdcsStatus = 1;
+                portEXIT_CRITICAL(&param_lock);
+            } else {
+                portENTER_CRITICAL(&param_lock);
+                coil_reg_params[0].coil_AdcsStatus = 0;
+                portEXIT_CRITICAL(&param_lock);
+            }
+            printf("Tutto ok\n");
+            checkCells = 0;
         }
-        printf("Controllando stato adcs\n");
-        unsigned int result_adcs = bilancia->check_adcs();
-        if (result_adcs > 0) {
-            printf("Errore adcs\n");
-            portENTER_CRITICAL(&param_lock);
-            coil_reg_params.coil_AdcsStatus = 1;
-            portEXIT_CRITICAL(&param_lock);
-        } else {
-            portENTER_CRITICAL(&param_lock);
-            coil_reg_params.coil_AdcsStatus = 0;
-            portEXIT_CRITICAL(&param_lock);
-        }
-        printf("Tutto ok\n");
-        checkCells = 0;
     }
 }
 
