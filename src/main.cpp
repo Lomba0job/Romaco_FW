@@ -48,14 +48,14 @@ void configure_modbus_slave() {
     // Setup register areas
     // Setup Holding Registers
     reg_area.type = MB_PARAM_HOLDING;
-    reg_area.start_offset = MB_REG_HOLDING_START(0);
+    reg_area.start_offset = MB_REG_HOLDING_START();
     reg_area.address = (void*)&holding_reg_params;
     reg_area.size = sizeof(holding_reg_params_t);
     ESP_ERROR_CHECK(mbc_slave_set_descriptor(reg_area));
 
     // Setup Coils
     reg_area.type = MB_PARAM_COIL;
-    reg_area.start_offset = MB_REG_COILS_START(0);
+    reg_area.start_offset = MB_REG_COILS_START();
     reg_area.address = (void*)&coil_reg_params;
     reg_area.size = sizeof(coil_reg_params_t);
     ESP_ERROR_CHECK(mbc_slave_set_descriptor(reg_area));
@@ -137,7 +137,7 @@ extern "C" void app_main(void) {
             }
         } else prevTare = 0;
 
-        if (coil_reg_params[0].coil_CalibCommand == 1) {
+        if (coil_reg_params.coil_CalibCommand == 1) {
             if (prevCalib == 0) {
                 coil_reg_params.coil_LastCommandSuccess = 0;
                 pesoCalib = holding_reg_params.holding_pesoCalibMS * (2 ^ 16) + holding_reg_params.holding_pesoCalibLS;
