@@ -77,6 +77,7 @@ extern "C" void app_main(void) {
     int32_t cell1_data = 0, cell2_data = 0, cell3_data = 0, cell4_data = 0, pesoTot_data = 0;
     
     bool prevTare = 0, prevCalib = 0, checkCells = 0;
+    int32_t pesoCalib = 0;
     char stato = 'A';
     int wei = 0;
     time_t tStart, tStart_check;
@@ -183,7 +184,7 @@ extern "C" void app_main(void) {
                     if (!mem->systemOK()) holding_reg_params[0].diagnostic |= 1UL << 4;
                     else holding_reg_params[0].diagnostic &= ~(1UL << 4);
                     portEXIT_CRITICAL(&param_lock);
-                    stato = "A";
+                    stato = 'A';
                     coil_reg_params[0].coil_CalibCommand = 0;
                     coil_reg_params[0].coil_LastCommandSuccess = 1;
                 }
