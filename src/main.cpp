@@ -27,11 +27,22 @@
 #define MB_PORT_NUM 2
 #define MB_DEV_SPEED 9600
 #define MB_PARITY MB_PARITY_NONE
-
+#define sample_freq 5 //Sample frequency in Hertz
+#define times 5 //Numero medie per singole misure (tara e calibrazione * 2)
+#define buffer 10   //Numero di campioni per filtri interni celle di carico
+#define wait_time 1    //Numero di secondi di attesa per misura finale
+#define discharge_time 1   //Numero di secondi oltre i quali siamo certi che il carrello sia stato scaricato
+#define err_perc 10 //Distaccamento percentuale dalla misura di riferimento per il controllo di corretto funzionamento delle celle\
 // Tag per il logging
 static const char *TAG = "MODBUS_SLAVE";
 
-void app_main(void) {
+static portMUX_TYPE param_lock = portMUX_INITIALIZER_UNLOCKED;  //?????
+
+int err=0;
+
+
+extern "C" void app_main(void)
+{
     init_Daisy();
 
     // Configurazione della porta UART per la comunicazione Modbus
