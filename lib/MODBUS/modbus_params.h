@@ -37,6 +37,7 @@ typedef struct
     uint16_t holding_pesoCalibMS;
     uint16_t holding_pesoCalibLS;
     uint16_t connection_dummy;
+    uint16_t count;
     uint16_t diagnostic;
 } holding_reg_params_t;
 #pragma pack(pop)

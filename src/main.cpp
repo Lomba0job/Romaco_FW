@@ -75,8 +75,7 @@ extern "C" void app_main(void) {
     configure_modbus_slave();
 
     int32_t cell1_data = 0, cell2_data = 0, cell3_data = 0, cell4_data = 0, pesoTot_data = 0;
-    int32_t pesoDX = 0, pesoSX = 0, pesoCalib = 0, imbalanceLimit = 0, maximumLimit = 0;
-    uint16_t storeID = 0, workplaceID = 0;
+    
     bool prevTare = 0, prevCalib = 0, checkCells = 0;
     char stato = 'A';
     int wei = 0;
@@ -122,8 +121,6 @@ extern "C" void app_main(void) {
         cell2_data = bilancia->get_last_units(1);
         cell3_data = bilancia->get_last_units(2);
         cell4_data = bilancia->get_last_units(3);
-        pesoDX = cell1_data + cell2_data;
-        pesoSX = cell3_data + cell4_data;
 
         portENTER_CRITICAL(&param_lock);
         coil_reg_params[0].coil_PresenceStatus = !gpio_get_level(avvio_lettura);
