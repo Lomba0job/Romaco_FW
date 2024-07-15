@@ -7,12 +7,18 @@
  * @version alpha 0.0.0
  */
 #include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_log.h"
+#include <stdint.h>
+#include <time.h>
 #include "esp_err.h"
-#include "device_params.h"
-#include "modbus_params.h"  // Include la tua libreria Modbus
+#include "mbcontroller.h"       // for mbcontroller defines and api
+#include "modbus_params.h"      // for modbus parameters structures
+#include "esp_log.h"            // for log_write
+#include "sdkconfig.h"
+#include "DAISY_PINOUT.hpp"
+#include "HX711.hpp"
+#include "COND.hpp"
+#include "ALGO.hpp"
+#include "PERSISTENCE.hpp"
 
 // Definisce l'ID dello slave Modbus
 #define MB_SLAVE_ADDR 1
@@ -26,6 +32,10 @@
 static const char *TAG = "MODBUS_SLAVE";
 
 void app_main(void) {
+
+    init_Daisy();
+
+
     // Configurazione della porta UART per la comunicazione Modbus
     uart_config_t uart_config = {
         .baud_rate = MB_DEV_SPEED,
@@ -87,18 +97,208 @@ void app_main(void) {
     // Avvia il controller Modbus
     ESP_ERROR_CHECK(mbcontroller_start(handler));
 
+
+        //-----------------------------------------SETUP SCALE-----------------------------------------
+    int32_t cell1_data=0;
+    int32_t cell2_data=0;
+    int32_t cell3_data=0;
+    int32_t cell4_data=0;
+    int32_t pesoTot_data=0;
+    int32_t pesoDX=0;
+    int32_t pesoSX=0;
+    int32_t pesoCalib = 0;
+    int32_t imbalanceLimit = 0;
+    int32_t maximumLimit = 0;
+    uint16_t storeID = 0;
+    uint16_t workplaceID = 0;
+    bool prevTare=0;
+    bool prevCalib=0;
+    bool checkCells=0;
+    char stato='A';
+    int wei = 0;
+    time_t tStart;
+    time_t tStart_check;
+    holding_reg_params.diagnostic=0;
+    holding_reg_params.connection_dummy=1;
+    //ADC1, ChanA (gain 64)
+    HX711* cond1=new HX711();
+    cond1->init(ADC1_DATA, ADC1_CLOCK);
+    cond1->set_gain(eGAIN_64); 
+    cond1->set_algo(new Combination(new Mediana(buffer), new MediaMobile(5)));
+    //ADC1, ChanB (gain 32)
+    HX711* cond2=new HX711();
+    cond2->init(ADC1_DATA, ADC1_CLOCK);
+    cond2->set_gain(eGAIN_32); 
+    cond2->set_algo(new Combination(new Mediana(buffer), new MediaMobile(5)));
+    //ADC2, ChanA (gain 64)
+    HX711* cond3=new HX711();
+    cond3->init(ADC2_DATA, ADC2_CLOCK);
+    cond3->set_gain(eGAIN_64); 
+    cond3->set_algo(new Combination(new Mediana(buffer), new MediaMobile(5)));
+    //ADC2, ChanB (gain 32)
+    HX711* cond4=new HX711();
+    cond4->init(ADC2_DATA, ADC2_CLOCK);
+    cond4->set_gain(eGAIN_32); 
+    cond4->set_algo(new Combination(new Mediana(buffer), new MediaMobile(5)));
+    //CONDIZIONATORE DI SEGNALE
+    COND* bilancia=new COND();
+    HX711** conds = (HX711**) malloc(sizeof(HX711*)*4);
+    conds[0]=cond1; //Bilancia basso destra
+    conds[1]=cond2; //Bilancia alto destra
+    conds[2]=cond3; //Bilancia alto sinistra
+    conds[3]=cond4; //Bilancia basso sinistra
+    bilancia->init(conds, 4); 
+    //Defining a filtering algorithm
+    ALGO* algo = new Dummy();
+    bilancia->set_algo(algo);
+    //Defining a memory saving system
+    SPIFFS* mem = new SPIFFS();
+
+    int o=0;
+
     // Ciclo principale
     while (1) {
         // Qui puoi aggiornare i tuoi holding_reg_params e coil_reg_params se necessario
+        //LETTURA CELLE DI CARICO
+        pesoTot_data = bilancia->get_units(1);
+        o=o+1;
+        cell1_data = bilancia->get_last_units(0);
+        cell2_data = bilancia->get_last_units(1);
+        cell3_data = bilancia->get_last_units(2);
+        cell4_data = bilancia->get_last_units(3);
+        pesoDX = cell1_data + cell2_data;
+        pesoSX = cell3_data + cell4_data;
+        //AGGIORNAMENTO REGISTRI MODBUS
+        portENTER_CRITICAL(&param_lock);
+            //Presence status
+            coil_reg_params.coil_PresenceStatus = !gpio_get_level(avvio_lettura);   //*ingresso in logica inversa
+        portEXIT_CRITICAL(&param_lock);
+        //DEFINIZIONE PROTOCOLLO DI CALIBRAZIONE
+        if(coil_reg_params.coil_TareCommand==1) { //Intercettazione comando di tara
+            if(prevTare==0) { //Rising edge
+                coil_reg_params.coil_LastCommandSuccess=0;
+                bilancia->tare(times*2);
+                printf("Tare Command requested!\n");
+                prevTare=1;
+                coil_reg_params.coil_LastCommandSuccess=1;
+            }
+        }
+        else prevTare=0;
+        if(coil_reg_params.coil_CalibCommand==1) { //Intercettazione comando di calibrazione
+            if(prevCalib==0) { //Rising edge
+                coil_reg_params.coil_LastCommandSuccess=0;
+                pesoCalib = holding_reg_params.holding_pesoCalibMS*(2^16) + holding_reg_params.holding_pesoCalibLS;
+                bilancia->calib(pesoCalib, times*2);
+                printf("Calib Command requested!: %f\n", bilancia->get_calfact());
+                prevCalib=1;
+                coil_reg_params.coil_LastCommandSuccess=1;
+            }
+        }
+        else prevCalib=0;
+
+
+        if(coil_reg_params.coil_CalibCommand==1) { //Intercettazione comando di richeista peso
+            if(stato == 'A')
+            {
+                printf("richiesto il peso...\n");
+                tStart=time(NULL);
+                o=0;
+                stato='B';
+            }
+            else if(stato=='B') {    //Attesa misure
+                if(difftime(time(NULL), tStart)>wait_time) {    //Tempo di attesa terminato
+                    printf("Tempo di attesa passato :\n");
+                    printf("Numero misure fatte: %d\n", o);
+
+                    wei = (int)pesoTot_data;
+                    printf("Valore i: %d", wei);
+                    //Aggiorno registri Modbus
+                    portENTER_CRITICAL(&param_lock);
+                        holding_reg_params.holding_cell1LS=uint16_t(cell1_data);
+                        holding_reg_params.holding_cell1MS=cell1_data>>16;
+                        holding_reg_params.holding_cell2LS=uint16_t(cell2_data);
+                        holding_reg_params.holding_cell2MS=cell2_data>>16;
+                        holding_reg_params.holding_cell3LS=uint16_t(cell3_data);
+                        holding_reg_params.holding_cell3MS=cell3_data>>16;
+                        holding_reg_params.holding_cell4LS=uint16_t(cell4_data);
+                        holding_reg_params.holding_cell4MS=cell4_data>>16;
+                        holding_reg_params.holding_pesoTotLS=uint16_t(pesoTot_data);
+                        holding_reg_params.holding_pesoTotMS=pesoTot_data>>16;    //Prima era pesoTotData
+                        holding_reg_params.count=holding_reg_params.count+1;
+                        //Diagnosic code
+                        if(bilancia->check_adcs(0)) holding_reg_params.diagnostic |= 1UL << 0;
+                        else holding_reg_params.diagnostic &= ~(1UL << 0);
+                        if(bilancia->check_adcs(1)) holding_reg_params.diagnostic |= 1UL << 1;
+                        else holding_reg_params.diagnostic &= ~(1UL << 1);
+                        if(bilancia->check_adcs(2)) holding_reg_params.diagnostic |= 1UL << 2;
+                        else holding_reg_params.diagnostic &= ~(1UL << 2);
+                        if(bilancia->check_adcs(3)) holding_reg_params.diagnostic |= 1UL << 3;
+                        else holding_reg_params.diagnostic &= ~(1UL << 3);
+                        if(!mem->systemOK()) holding_reg_params.diagnostic |= 1UL << 4;
+                        else holding_reg_params.diagnostic &= ~(1UL << 4);
+                    portEXIT_CRITICAL(&param_lock);
+
+                    stato = "A";
+                    coil_reg_params.coil_CalibCommand=0;
+                    coil_reg_params.coil_LastCommandSuccess=1;
+                }
+            }
+            if(checkCells==1 && difftime(time(NULL), tStart_check)>discharge_time && coil_reg_params.coil_PresenceStatus==0) {  //Controllo correttezza celle di carico
+                printf("Controllando stato celle\n");
+                unsigned int result_cells = bilancia->check_loadCells(err_perc);
+                if(result_cells>0) {
+                    printf("Errore celle\n");
+                    portENTER_CRITICAL(&param_lock);
+                        coil_reg_params.coil_CellStatus = 1;
+                        if(result_cells==1) holding_reg_params.diagnostic |= 1UL << 5;
+                        else holding_reg_params.diagnostic &= ~(1UL << 5);
+                        if(result_cells==2) holding_reg_params.diagnostic |= 1UL << 6;
+                        else holding_reg_params.diagnostic &= ~(1UL << 6);
+                        if(result_cells==3) holding_reg_params.diagnostic |= 1UL << 7;
+                        else holding_reg_params.diagnostic &= ~(1UL << 7);
+                        if(result_cells==4) holding_reg_params.diagnostic |= 1UL << 8;
+                        else holding_reg_params.diagnostic &= ~(1UL << 8);
+                    portEXIT_CRITICAL(&param_lock);
+                }
+                else {
+                    //bilancia->tare(times);
+                    portENTER_CRITICAL(&param_lock);
+                        coil_reg_params.coil_CellStatus = 0;
+                    portEXIT_CRITICAL(&param_lock);
+                }
+                printf("Controllando stato adcs\n");
+                unsigned int result_adcs = bilancia->check_adcs();
+                if(result_adcs>0) {
+                    printf("Errore adcs\n");
+                    portENTER_CRITICAL(&param_lock);
+                        coil_reg_params.coil_AdcsStatus = 1;
+                    portEXIT_CRITICAL(&param_lock);
+                }
+                else {
+                    portENTER_CRITICAL(&param_lock);
+                        coil_reg_params.coil_AdcsStatus = 0;
+                    portEXIT_CRITICAL(&param_lock);
+                }
+                printf("Tutto ok\n");
+                checkCells=0;
+            }   
+        }
+
+            
+
 
         // Log di debug
-        ESP_LOGI(TAG, "Modbus slave in esecuzione");
+        // ESP_LOGI(TAG, "Modbus slave in esecuzione");
 
         // Ritardo
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
-    // Ferma il controller Modbus (questa linea non verrà mai raggiunta in questo esempio)
-    ESP_ERROR_CHECK(mbcontroller_stop(handler));
-    ESP_ERROR_CHECK(mbcontroller_destroy(handler));
+    ESP_LOGI(SLAVE_TAG,"Modbus controller destroyed.");
+    vTaskDelay(100);
+    ESP_ERROR_CHECK(mbc_slave_destroy());
+    //Deallocate data structures
+    algo->free_mem();
+    bilancia->free_mem();
+    free(conds);
 }

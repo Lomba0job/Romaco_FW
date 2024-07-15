@@ -11,10 +11,11 @@
 #pragma pack(push, 1)
 typedef struct
 {
+    uint8_t coil_PesoCommand;
     uint8_t coil_TareCommand;
     uint8_t coil_CalibCommand;
     uint8_t coil_LastCommandSuccess;
-    uint8_t coil_ReadingStatus;
+    uint8_t coil_PresenceStatus;
     uint8_t coil_CellStatus;
     uint8_t coil_AdcsStatus;
 } coil_reg_params_t;
