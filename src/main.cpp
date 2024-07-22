@@ -116,8 +116,7 @@ extern "C" void app_main(void) {
 
     int o = 0;
 
-    while (1) {
-        // Continua il normale funzionamento
+    while (true) {
         pesoTot_data = bilancia->get_units(1);
         o = o + 1;
         cell1_data = bilancia->get_last_units(0);
@@ -125,22 +124,15 @@ extern "C" void app_main(void) {
         cell3_data = bilancia->get_last_units(2);
         cell4_data = bilancia->get_last_units(3);
 
-        if(gpio_get_level(avvio_lettura) == 1)
-        {
-            if (coil_reg_params.coil_Config == 0)
-            {
+        if (gpio_get_level(avvio_lettura) == 1) {
+            if (coil_reg_params.coil_Config == 0) {
                 vTaskDelay(500 / portTICK_PERIOD_MS);
-                portENTER_CRITICAL(&param_lock);
                 coil_reg_params.coil_Config = 1;
-                portEXIT_CRITICAL(&param_lock);
             }
         }
 
-        if(gpio_get_level(avvio_lettura) == 0)
-            portENTER_CRITICAL(&param_lock);
+        if (gpio_get_level(avvio_lettura) == 0) 
             coil_reg_params.coil_Config = 0;
-            portEXIT_CRITICAL(&param_lock);
-
         
 
         if (coil_reg_params.coil_TareCommand == 1) {
@@ -151,7 +143,9 @@ extern "C" void app_main(void) {
                 prevTare = 1;
                 coil_reg_params.coil_LastCommandSuccess = 1;
             }
-        } else prevTare = 0;
+        } else {
+            prevTare = 0;
+        }
 
         if (coil_reg_params.coil_CalibCommand == 1) {
             if (prevCalib == 0) {
@@ -162,7 +156,9 @@ extern "C" void app_main(void) {
                 prevCalib = 1;
                 coil_reg_params.coil_LastCommandSuccess = 1;
             }
-        } else prevCalib = 0;
+        } else {
+            prevCalib = 0;
+        }
 
         if (coil_reg_params.coil_CalibCommand == 1) {
             if (stato == 'A') {
@@ -179,7 +175,7 @@ extern "C" void app_main(void) {
 
                     portENTER_CRITICAL(&param_lock);
                     holding_reg_params.holding_cell1MS = cell1_data >> 16;
-                    holding_reg_params.holding_cell1LS = uint16_t (cell1_data);
+                    holding_reg_params.holding_cell1LS = uint16_t(cell1_data);
                     holding_reg_params.holding_cell2LS = uint16_t(cell2_data);
                     holding_reg_params.holding_cell2MS = cell2_data >> 16;
                     holding_reg_params.holding_cell3LS = uint16_t(cell3_data);
@@ -206,6 +202,7 @@ extern "C" void app_main(void) {
                 }
             }
         }
+
         if (checkCells == 1 && difftime(time(NULL), tStart_check) > discharge_time && coil_reg_params.coil_PresenceStatus == 0) {
             printf("Controllando stato celle\n");
             unsigned int result_cells = bilancia->check_loadCells(err_perc);
@@ -244,9 +241,8 @@ extern "C" void app_main(void) {
         }
     }
 
-
     ESP_LOGI(SLAVE_TAG, "Modbus controller destroyed.");
-    vTaskDelay(100);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
     ESP_ERROR_CHECK(mbc_slave_destroy());
 
     algo->free_mem();

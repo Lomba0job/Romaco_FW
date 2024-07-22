@@ -73,11 +73,14 @@ extern discrete_reg_params_t discrete_reg_params;
 #define CONFIG_MB_UART_TXD RS485_TX
 #define CONFIG_MB_UART_RXD RS485_RX
 #define CONFIG_MB_UART_RTS RS485_EN
+
 //DEFINIZIONE START ADDRESS PER OGNI TIPO DI PARAMETRO MODBUS
 #define HOLD_OFFSET(field) ((uint16_t)(offsetof(holding_reg_params_t, field) >> 1))
 #define INPUT_OFFSET(field) ((uint16_t)(offsetof(input_reg_params_t, field) >> 1))
-#define MB_REG_COILS_START                  (0x0000)
-#define MB_REG_HOLDING_START         (HOLD_OFFSET(holding_cell1MS))
+#define COIL_OFFSET(field) ((uint16_t)(offsetof(coil_reg_params_t, field)))
+#define MB_REG_COILS_START                  (COIL_OFFSET(coil_PesoCommand))
+#define MB_REG_HOLDING_START                (HOLD_OFFSET(holding_cell1MS))
+
 //DEFINIZIONE PARAMETRI PROTOCOLLO MODBUS
 #define MB_PAR_INFO_GET_TOUT                (10) // Timeout for get parameter info
 #define MB_CHAN_DATA_MAX_VAL                (6)
