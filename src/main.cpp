@@ -11,6 +11,8 @@
 #include "COND.hpp"
 #include "ALGO.hpp"
 #include "PERSISTENCE.hpp"
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #define MB_SLAVE_ADDR 1
 #define MB_PORT_NUM 2
@@ -124,7 +126,18 @@ extern "C" void app_main(void) {
         cell4_data = bilancia->get_last_units(3);
 
         portENTER_CRITICAL(&param_lock);
-        coil_reg_params.coil_PresenceStatus = !gpio_get_level(avvio_lettura);
+        if(gpio_get_level(avvio_lettura) == 1)
+        {
+            if (coil_reg_params.coil_Config == 0)
+            {
+                vTaskDelay(500 / portTICK_PERIOD_MS);
+                coil_reg_params.coil_Config = 1;
+            }
+        }
+
+        if(gpio_get_level(avvio_lettura) == 0)
+            coil_reg_params.coil_Config = 0;
+
         portEXIT_CRITICAL(&param_lock);
 
         if (coil_reg_params.coil_TareCommand == 1) {

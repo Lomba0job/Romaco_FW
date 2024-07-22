@@ -8,7 +8,7 @@ void init_Daisy(){
     // gpio_reset_pin(esito_controllo_peso);
     // gpio_reset_pin(esito_lettura);
     // gpio_reset_pin(Q6);
-    // gpio_reset_pin(avvio_lettura);
+    gpio_reset_pin(avvio_lettura);
     // gpio_reset_pin(reset);
     // gpio_reset_pin(interruttore);
     // gpio_reset_pin(Sens1);
@@ -25,7 +25,7 @@ void init_Daisy(){
     // gpio_set_direction(esito_lettura, GPIO_MODE_OUTPUT);
     // gpio_set_direction(esito_controllo_peso, GPIO_MODE_OUTPUT);
     // gpio_set_direction(Q6, GPIO_MODE_OUTPUT);
-    // gpio_set_direction(avvio_lettura, GPIO_MODE_INPUT);
+    gpio_set_direction(avvio_lettura, GPIO_MODE_INPUT);
     // gpio_set_direction(reset, GPIO_MODE_INPUT);
     // gpio_set_direction(interruttore, GPIO_MODE_INPUT);
     // gpio_set_direction(Sens1, GPIO_MODE_INPUT);
