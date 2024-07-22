@@ -125,20 +125,23 @@ extern "C" void app_main(void) {
         cell3_data = bilancia->get_last_units(2);
         cell4_data = bilancia->get_last_units(3);
 
-        portENTER_CRITICAL(&param_lock);
         if(gpio_get_level(avvio_lettura) == 1)
         {
             if (coil_reg_params.coil_Config == 0)
             {
                 vTaskDelay(500 / portTICK_PERIOD_MS);
+                portENTER_CRITICAL(&param_lock);
                 coil_reg_params.coil_Config = 1;
+                portEXIT_CRITICAL(&param_lock);
             }
         }
 
         if(gpio_get_level(avvio_lettura) == 0)
+            portENTER_CRITICAL(&param_lock);
             coil_reg_params.coil_Config = 0;
+            portEXIT_CRITICAL(&param_lock);
 
-        portEXIT_CRITICAL(&param_lock);
+        
 
         if (coil_reg_params.coil_TareCommand == 1) {
             if (prevTare == 0) {
