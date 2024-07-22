@@ -47,6 +47,12 @@ void configure_modbus_slave() {
     comm_info.parity = MB_PARITY_NONE;
     ESP_ERROR_CHECK(mbc_slave_setup((void*)&comm_info));
 
+    // Log for debugging
+    ESP_LOGI(SLAVE_TAG, "Holding Register start offset: %d", MB_REG_HOLDING_START);
+    ESP_LOGI(SLAVE_TAG, "Coil start offset: %d", MB_REG_COILS_START);
+    ESP_LOGI(SLAVE_TAG, "Size of holding_reg_params_t: %d", sizeof(holding_reg_params_t));
+    ESP_LOGI(SLAVE_TAG, "Size of coil_reg_params_t: %d", sizeof(coil_reg_params_t));
+
     // Setup register areas
     // Setup Holding Registers
     reg_area.type = MB_PARAM_HOLDING;
