@@ -22,7 +22,7 @@ void init_Daisy(){
     gpio_set_direction(led2, GPIO_MODE_OUTPUT);
     // gpio_set_direction(Q5, GPIO_MODE_OUTPUT);
     // gpio_set_direction(DirMotor, GPIO_MODE_OUTPUT);
-    // gpio_set_direction(esito_lettura, GPIO_MODE_OUTPUT);
+    gpio_set_direction(response, GPIO_MODE_OUTPUT);
     // gpio_set_direction(esito_controllo_peso, GPIO_MODE_OUTPUT);
     // gpio_set_direction(Q6, GPIO_MODE_OUTPUT);
     gpio_set_direction(avvio_lettura, GPIO_MODE_INPUT);
@@ -41,5 +41,5 @@ void init_Daisy(){
     // gpio_set_level(Q5, 0);
     // gpio_set_level(DirMotor, 0);
     // gpio_set_level(esito_controllo_peso, 0);
-    // gpio_set_level(esito_lettura, 0);
+    gpio_set_level(response, 0);
 }

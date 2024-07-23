@@ -67,7 +67,7 @@ extern discrete_reg_params_t discrete_reg_params;
 
 //DEFINIZIONE PARAMETRI COMUNICAZIONE
 #define MB_PORT_NUM     2   // Number of UART port used for Modbus connection
-#define MB_SLAVE_ADDR   1     // The address of device in Modbus network
+#define MB_SLAVE_ADDR   3     // The address of device in Modbus network
 #define MB_DEV_SPEED    9600  // The communication speed of the UART
 #define CONFIG_MB_COMM_MODE_RTU 1
 #define CONFIG_MB_UART_TXD RS485_TX
@@ -77,7 +77,7 @@ extern discrete_reg_params_t discrete_reg_params;
 //DEFINIZIONE START ADDRESS PER OGNI TIPO DI PARAMETRO MODBUS
 #define HOLD_OFFSET(field) ((uint16_t)(offsetof(holding_reg_params_t, field) >> 1))
 #define INPUT_OFFSET(field) ((uint16_t)(offsetof(input_reg_params_t, field) >> 1))
-#define COIL_OFFSET(field) ((uint16_t)(offsetof(coil_reg_params_t, field)))
+#define COIL_OFFSET(field) ((uint8_t)(offsetof(coil_reg_params_t, field) >> 1))
 #define MB_REG_COILS_START                  (COIL_OFFSET(coil_PesoCommand))
 #define MB_REG_HOLDING_START                (HOLD_OFFSET(holding_cell1MS))
 

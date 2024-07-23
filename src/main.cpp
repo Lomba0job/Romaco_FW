@@ -14,7 +14,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#define MB_SLAVE_ADDR 1
+#define MB_SLAVE_ADDR 3
 #define MB_PORT_NUM 2
 #define MB_DEV_SPEED 9600
 #define MB_PARITY MB_PARITY_NONE
@@ -52,6 +52,7 @@ void configure_modbus_slave() {
     ESP_LOGI(SLAVE_TAG, "Coil start offset: %d", MB_REG_COILS_START);
     ESP_LOGI(SLAVE_TAG, "Size of holding_reg_params_t: %d", sizeof(holding_reg_params_t));
     ESP_LOGI(SLAVE_TAG, "Size of coil_reg_params_t: %d", sizeof(coil_reg_params_t));
+    ESP_LOGI(SLAVE_TAG, "Address: %d", comm_info.slave_addr);
 
     // Setup register areas
     // Setup Holding Registers
@@ -134,12 +135,15 @@ extern "C" void app_main(void) {
             if (coil_reg_params.coil_Config == 0) {
                 vTaskDelay(500 / portTICK_PERIOD_MS);
                 coil_reg_params.coil_Config = 1;
+                gpio_set_level(response, 1);
             }
         }
 
         if (gpio_get_level(avvio_lettura) == 0) 
+        {
             coil_reg_params.coil_Config = 0;
-        
+            gpio_set_level(response, 0);
+        }
 
         if (coil_reg_params.coil_TareCommand == 1) {
             if (prevTare == 0) {

@@ -4,7 +4,7 @@
 //Defining pinout
 #define led1 GPIO_NUM_25  //Q0_PWM
 #define led2 GPIO_NUM_26  //Q1_PWM
-// #define esito_lettura GPIO_NUM_27  //Q2
+#define response GPIO_NUM_27  //Q2
 // #define DirMotor GPIO_NUM_12  //Q3
 // #define esito_controllo_peso GPIO_NUM_13  //Q4
 // #define Q5 GPIO_NUM_2   //Q5
