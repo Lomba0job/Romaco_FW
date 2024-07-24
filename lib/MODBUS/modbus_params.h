@@ -19,6 +19,7 @@ typedef struct
     uint8_t coil_CellStatus;
     uint8_t coil_AdcsStatus;
     uint8_t coil_Config;
+    uint8_t status_input;
 } coil_reg_params_t;
 #pragma pack(pop)
 

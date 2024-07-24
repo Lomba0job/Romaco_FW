@@ -133,17 +133,20 @@ extern "C" void app_main(void) {
         cell3_data = bilancia->get_last_units(2);
         cell4_data = bilancia->get_last_units(3);
 
-        
+        portENTER_CRITICAL(&param_lock);
+        coil_reg_params.status_input = gpio_get_level(avvio_lettura);
+        portEXIT_CRITICAL(&param_lock);
         //ESP_LOGI(IO_TAG, "stato I0: %d", (int)gpio_get_level(avvio_lettura));
         
         if(coil_reg_params.coil_Config == 0)
         {
             //printf("DEBUG |entrato coil == 0\n");
-            if (gpio_get_level(avvio_lettura) == 1) 
+            if (gpio_get_level(avvio_lettura) == 0) 
             {
                 ESP_LOGI(IO_TAG, "stato 1 -> I0: %d", gpio_get_level(avvio_lettura));
                 ESP_LOGI(IO_TAG, "coil status %d", coil_reg_params.coil_Config );
-                vTaskDelay(500 / portTICK_PERIOD_MS);
+                vTaskDelay(1000 / portTICK_PERIOD_MS);
+                printf("Delay, termianto");
                 portENTER_CRITICAL(&param_lock);
                 coil_reg_params.coil_Config = 1;
                 portEXIT_CRITICAL(&param_lock);
@@ -152,7 +155,7 @@ extern "C" void app_main(void) {
         }
 
         
-        if (gpio_get_level(avvio_lettura) == 0) 
+        if (gpio_get_level(avvio_lettura) == 1) 
         {
             //printf("DEBUG |entrato avvio_lettura == 0\n");
             if(coil_reg_params.coil_Config != 0)

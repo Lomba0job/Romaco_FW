@@ -41,5 +41,5 @@ void init_Daisy(){
     // gpio_set_level(Q5, 0);
     // gpio_set_level(DirMotor, 0);
     // gpio_set_level(esito_controllo_peso, 0);
-    gpio_set_level(response, 1);
+    gpio_set_level(response, 0);
 }
