@@ -14,7 +14,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#define MB_SLAVE_ADDR 3
+#define MB_SLAVE_ADDR 1
 #define MB_PORT_NUM 2
 #define MB_DEV_SPEED 9600
 #define MB_PARITY MB_PARITY_NONE
@@ -26,6 +26,7 @@
 #define err_perc 10
 
 static const char *SLAVE_TAG = "MODBUS_SLAVE";
+static const char *IO_TAG = "IO_CHANGE";
 static portMUX_TYPE param_lock = portMUX_INITIALIZER_UNLOCKED;
 int err = 0;
 
@@ -127,22 +128,43 @@ extern "C" void app_main(void) {
         pesoTot_data = bilancia->get_units(1);
         o = o + 1;
         cell1_data = bilancia->get_last_units(0);
+        //ESP_LOGI(SLAVE_TAG, "Coil Cnfig: %d", (int)coil_reg_params.coil_Config);
         cell2_data = bilancia->get_last_units(1);
         cell3_data = bilancia->get_last_units(2);
         cell4_data = bilancia->get_last_units(3);
 
-        if (gpio_get_level(avvio_lettura) == 1) {
-            if (coil_reg_params.coil_Config == 0) {
+        
+        //ESP_LOGI(IO_TAG, "stato I0: %d", (int)gpio_get_level(avvio_lettura));
+        
+        if(coil_reg_params.coil_Config == 0)
+        {
+            //printf("DEBUG |entrato coil == 0\n");
+            if (gpio_get_level(avvio_lettura) == 1) 
+            {
+                ESP_LOGI(IO_TAG, "stato 1 -> I0: %d", gpio_get_level(avvio_lettura));
+                ESP_LOGI(IO_TAG, "coil status %d", coil_reg_params.coil_Config );
                 vTaskDelay(500 / portTICK_PERIOD_MS);
+                portENTER_CRITICAL(&param_lock);
                 coil_reg_params.coil_Config = 1;
+                portEXIT_CRITICAL(&param_lock);
                 gpio_set_level(response, 1);
             }
         }
 
+        
         if (gpio_get_level(avvio_lettura) == 0) 
         {
-            coil_reg_params.coil_Config = 0;
-            gpio_set_level(response, 0);
+            //printf("DEBUG |entrato avvio_lettura == 0\n");
+            if(coil_reg_params.coil_Config != 0)
+            {
+
+                ESP_LOGI(IO_TAG, " stato 0 -> I0: %d", gpio_get_level(avvio_lettura));
+                ESP_LOGI(IO_TAG, "coil status %d", coil_reg_params.coil_Config );
+                portENTER_CRITICAL(&param_lock);
+                coil_reg_params.coil_Config = 0;
+                portEXIT_CRITICAL(&param_lock);
+                gpio_set_level(response, 0);
+            }
         }
 
         if (coil_reg_params.coil_TareCommand == 1) {
