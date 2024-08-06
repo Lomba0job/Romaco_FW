@@ -14,7 +14,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#define MB_SLAVE_ADDR 1
+#define MB_SLAVE_ADDR 5
 #define MB_PORT_NUM 2
 #define MB_DEV_SPEED 9600
 #define MB_PARITY MB_PARITY_NONE
@@ -26,7 +26,7 @@
 #define err_perc 10
 
 static const char *SLAVE_TAG = "MODBUS_SLAVE";
-static const char *IO_TAG = "IO_CHANGE";
+//static const char *IO_TAG = "IO_CHANGE";
 static portMUX_TYPE param_lock = portMUX_INITIALIZER_UNLOCKED;
 int err = 0;
 
@@ -40,7 +40,7 @@ void configure_modbus_slave() {
     void* mbc_slave_handler = NULL;
     ESP_ERROR_CHECK(mbc_slave_init(MB_PORT_SERIAL_SLAVE, &mbc_slave_handler));
 
-    // Setup communication parameters
+    // Setup communica/ portTICK_PERIOD_MStion parameters
     comm_info.mode = MB_MODE_RTU;
     comm_info.slave_addr = MB_SLAVE_ADDR;
     comm_info.port = MB_PORT_NUM;
@@ -134,19 +134,30 @@ extern "C" void app_main(void) {
         cell4_data = bilancia->get_last_units(3);
 
         portENTER_CRITICAL(&param_lock);
-        coil_reg_params.status_input = gpio_get_level(avvio_lettura);
+        coil_reg_params.status_input = !gpio_get_level(avvio_lettura);
         portEXIT_CRITICAL(&param_lock);
         //ESP_LOGI(IO_TAG, "stato I0: %d", (int)gpio_get_level(avvio_lettura));
+        
+        if (coil_reg_params.coil_start_identificazione == 1)
+        {
+            printf("imposto da sistema lo 0 di configurazione\n");
+            portENTER_CRITICAL(&param_lock);
+            coil_reg_params.coil_Config = 0;
+            coil_reg_params.coil_start_identificazione = 0;
+            portEXIT_CRITICAL(&param_lock);
+            gpio_set_level(response, 0);
+            vTaskDelay(1000);
+        }
+
         
         if(coil_reg_params.coil_Config == 0)
         {
             //printf("DEBUG |entrato coil == 0\n");
-            if (gpio_get_level(avvio_lettura) == 0) 
+            if (coil_reg_params.status_input == 1) 
             {
-                ESP_LOGI(IO_TAG, "stato 1 -> I0: %d", gpio_get_level(avvio_lettura));
-                ESP_LOGI(IO_TAG, "coil status %d", coil_reg_params.coil_Config );
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-                printf("Delay, termianto");
+                printf("DEBUG | lo porto a uno e accendo l'uscita\n");
+                vTaskDelay(1000);
+                printf("Delay, termianto\n");
                 portENTER_CRITICAL(&param_lock);
                 coil_reg_params.coil_Config = 1;
                 portEXIT_CRITICAL(&param_lock);
@@ -155,14 +166,12 @@ extern "C" void app_main(void) {
         }
 
         
-        if (gpio_get_level(avvio_lettura) == 1) 
+        if (coil_reg_params.status_input == 0) 
         {
             //printf("DEBUG |entrato avvio_lettura == 0\n");
             if(coil_reg_params.coil_Config != 0)
             {
-
-                ESP_LOGI(IO_TAG, " stato 0 -> I0: %d", gpio_get_level(avvio_lettura));
-                ESP_LOGI(IO_TAG, "coil status %d", coil_reg_params.coil_Config );
+                printf("DEBUG | lo porto a zero e spengo l'uscita\n");
                 portENTER_CRITICAL(&param_lock);
                 coil_reg_params.coil_Config = 0;
                 portEXIT_CRITICAL(&param_lock);
@@ -195,7 +204,7 @@ extern "C" void app_main(void) {
             prevCalib = 0;
         }
 
-        if (coil_reg_params.coil_CalibCommand == 1) {
+        if (coil_reg_params.coil_PesoCommand == 1) {
             if (stato == 'A') {
                 printf("richiesto il peso...\n");
                 tStart = time(NULL);
@@ -232,7 +241,7 @@ extern "C" void app_main(void) {
                     else holding_reg_params.diagnostic &= ~(1UL << 4);
                     portEXIT_CRITICAL(&param_lock);
                     stato = 'A';
-                    coil_reg_params.coil_CalibCommand = 0;
+                    coil_reg_params.coil_PesoCommand = 0;
                     coil_reg_params.coil_LastCommandSuccess = 1;
                 }
             }

@@ -19,7 +19,8 @@ typedef struct
     uint8_t coil_CellStatus;
     uint8_t coil_AdcsStatus;
     uint8_t coil_Config;
-    uint8_t status_input;
+    uint8_t coil_start_identificazione;
+    uint8_t status_input;   
 } coil_reg_params_t;
 #pragma pack(pop)
 
@@ -68,7 +69,7 @@ extern discrete_reg_params_t discrete_reg_params;
 
 //DEFINIZIONE PARAMETRI COMUNICAZIONE
 #define MB_PORT_NUM     2   // Number of UART port used for Modbus connection
-#define MB_SLAVE_ADDR   1     // The address of device in Modbus network
+#define MB_SLAVE_ADDR   5     // The address of device in Modbus network
 #define MB_DEV_SPEED    9600  // The communication speed of the UART
 #define CONFIG_MB_COMM_MODE_RTU 1
 #define CONFIG_MB_UART_TXD RS485_TX
