@@ -146,7 +146,7 @@ extern "C" void app_main(void) {
             coil_reg_params.coil_start_identificazione = 0;
             portEXIT_CRITICAL(&param_lock);
             gpio_set_level(response, 0);
-            vTaskDelay(1000);
+            vTaskDelay(200);
         }
 
         
@@ -156,7 +156,7 @@ extern "C" void app_main(void) {
             if (coil_reg_params.status_input == 1) 
             {
                 printf("DEBUG | lo porto a uno e accendo l'uscita\n");
-                vTaskDelay(1000);
+                vTaskDelay(300);
                 printf("Delay, termianto\n");
                 portENTER_CRITICAL(&param_lock);
                 coil_reg_params.coil_Config = 1;
