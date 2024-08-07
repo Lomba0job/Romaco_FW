@@ -133,7 +133,7 @@ extern "C" void app_main(void) {
 
         if (gpio_get_level(avvio_lettura) == 1) {
             if (coil_reg_params.coil_Config == 0) {
-                vTaskDelay(500 / portTICK_PERIOD_MS);
+                vTaskDelay(300 / portTICK_PERIOD_MS);
                 coil_reg_params.coil_Config = 1;
                 gpio_set_level(response, 1);
             }
@@ -170,7 +170,7 @@ extern "C" void app_main(void) {
             prevCalib = 0;
         }
 
-        if (coil_reg_params.coil_CalibCommand == 1) {
+        if (coil_reg_params.coil_PesoCommand == 1) {
             if (stato == 'A') {
                 printf("richiesto il peso...\n");
                 tStart = time(NULL);
