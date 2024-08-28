@@ -14,7 +14,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#define MB_SLAVE_ADDR 5
+#define MB_SLAVE_ADDR 4
 #define MB_PORT_NUM 2
 #define MB_DEV_SPEED 9600
 #define MB_PARITY MB_PARITY_NONE
@@ -87,7 +87,7 @@ extern "C" void app_main(void) {
     int32_t cell1_data = 0, cell2_data = 0, cell3_data = 0, cell4_data = 0, pesoTot_data = 0;
     
     bool prevTare = 0, prevCalib = 0, checkCells = 0;
-    int32_t pesoCalib = 0;
+    int32_t pesoCalib = 0, pesoCalibMS = 0;
     char stato = 'A';
     int wei = 0;
     time_t tStart, tStart_check;
@@ -146,7 +146,7 @@ extern "C" void app_main(void) {
             coil_reg_params.coil_start_identificazione = 0;
             portEXIT_CRITICAL(&param_lock);
             gpio_set_level(response, 0);
-            vTaskDelay(200);
+            vTaskDelay(400); //0.1 per ogni bilancia 
         }
 
         
@@ -194,9 +194,10 @@ extern "C" void app_main(void) {
         if (coil_reg_params.coil_CalibCommand == 1) {
             if (prevCalib == 0) {
                 coil_reg_params.coil_LastCommandSuccess = 0;
-                pesoCalib = holding_reg_params.holding_pesoCalibMS * (2 ^ 16) + holding_reg_params.holding_pesoCalibLS;
+                pesoCalibMS = holding_reg_params.holding_pesoCalibMS * 65536;
+                pesoCalib = pesoCalibMS + holding_reg_params.holding_pesoCalibLS;
                 bilancia->calib(pesoCalib, times * 2);
-                printf("Calib Command requested!: %f\n", bilancia->get_calfact());
+                printf("Calib Command requested!: %d %f\n",pesoCalib,  bilancia->get_calfact());
                 prevCalib = 1;
                 coil_reg_params.coil_LastCommandSuccess = 1;
             }
@@ -206,6 +207,7 @@ extern "C" void app_main(void) {
 
         if (coil_reg_params.coil_PesoCommand == 1) {
             if (stato == 'A') {
+                coil_reg_params.coil_LastCommandSuccess = 0;
                 printf("richiesto il peso...\n");
                 tStart = time(NULL);
                 o = 0;
@@ -215,7 +217,11 @@ extern "C" void app_main(void) {
                     printf("Tempo di attesa passato :\n");
                     printf("Numero misure fatte: %d\n", o);
                     wei = (int)pesoTot_data;
-                    printf("Valore i: %d", wei);
+                    printf("Valore tot: %d\n", wei);
+                    printf("Cella1 : %d\n", cell1_data);
+                    printf("Cella2 : %d\n", cell2_data);
+                    printf("Cella3 : %d\n", cell3_data);
+                    printf("Cella4 : %d\n", cell4_data);
 
                     portENTER_CRITICAL(&param_lock);
                     holding_reg_params.holding_cell1MS = cell1_data >> 16;

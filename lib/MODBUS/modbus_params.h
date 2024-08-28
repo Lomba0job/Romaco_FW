@@ -69,7 +69,7 @@ extern discrete_reg_params_t discrete_reg_params;
 
 //DEFINIZIONE PARAMETRI COMUNICAZIONE
 #define MB_PORT_NUM     2   // Number of UART port used for Modbus connection
-#define MB_SLAVE_ADDR   5     // The address of device in Modbus network
+#define MB_SLAVE_ADDR   4     // The address of device in Modbus network
 #define MB_DEV_SPEED    9600  // The communication speed of the UART
 #define CONFIG_MB_COMM_MODE_RTU 1
 #define CONFIG_MB_UART_TXD RS485_TX
