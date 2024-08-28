@@ -146,7 +146,7 @@ extern "C" void app_main(void) {
             coil_reg_params.coil_start_identificazione = 0;
             portEXIT_CRITICAL(&param_lock);
             gpio_set_level(response, 0);
-            vTaskDelay(400); //0.1 per ogni bilancia 
+            vTaskDelay(50 * portTICK_PERIOD_MS); //0.1 per ogni bilancia 
         }
 
         
@@ -156,7 +156,7 @@ extern "C" void app_main(void) {
             if (coil_reg_params.status_input == 1) 
             {
                 printf("DEBUG | lo porto a uno e accendo l'uscita\n");
-                vTaskDelay(300);
+                vTaskDelay(100 * portTICK_PERIOD_MS);
                 printf("Delay, termianto\n");
                 portENTER_CRITICAL(&param_lock);
                 coil_reg_params.coil_Config = 1;
@@ -166,18 +166,7 @@ extern "C" void app_main(void) {
         }
 
         
-        if (coil_reg_params.status_input == 0) 
-        {
-            //printf("DEBUG |entrato avvio_lettura == 0\n");
-            if(coil_reg_params.coil_Config != 0)
-            {
-                printf("DEBUG | lo porto a zero e spengo l'uscita\n");
-                portENTER_CRITICAL(&param_lock);
-                coil_reg_params.coil_Config = 0;
-                portEXIT_CRITICAL(&param_lock);
-                gpio_set_level(response, 0);
-            }
-        }
+        
 
         if (coil_reg_params.coil_TareCommand == 1) {
             if (prevTare == 0) {
