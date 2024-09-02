@@ -137,16 +137,19 @@ extern "C" void app_main(void) {
         coil_reg_params.status_input = !gpio_get_level(avvio_lettura);
         portEXIT_CRITICAL(&param_lock);
         //ESP_LOGI(IO_TAG, "stato I0: %d", (int)gpio_get_level(avvio_lettura));
-        
+        printf("DEBUG | malloc, gpIo level %d\n", gpio_get_level(avvio_lettura));
+
+
         if (coil_reg_params.coil_start_identificazione == 1)
         {
             printf("imposto da sistema lo 0 di configurazione\n");
             portENTER_CRITICAL(&param_lock);
             coil_reg_params.coil_Config = 0;
             coil_reg_params.coil_start_identificazione = 0;
+            coil_reg_params.status_input = 0;
             portEXIT_CRITICAL(&param_lock);
             gpio_set_level(response, 0);
-            vTaskDelay(50 * portTICK_PERIOD_MS); //0.1 per ogni bilancia 
+            vTaskDelay(30 * portTICK_PERIOD_MS); //0.1 per ogni bilancia 
         }
 
         
@@ -156,7 +159,7 @@ extern "C" void app_main(void) {
             if (coil_reg_params.status_input == 1) 
             {
                 printf("DEBUG | lo porto a uno e accendo l'uscita\n");
-                vTaskDelay(100 * portTICK_PERIOD_MS);
+                vTaskDelay(60 * portTICK_PERIOD_MS);
                 printf("Delay, termianto\n");
                 portENTER_CRITICAL(&param_lock);
                 coil_reg_params.coil_Config = 1;
