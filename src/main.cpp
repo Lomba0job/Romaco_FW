@@ -122,6 +122,11 @@ extern "C" void app_main(void) {
     bilancia->set_algo(algo);
     SPIFFS *mem = new SPIFFS();
 
+    if(mem->systemOK()) 
+    {
+        bilancia->set_mem(mem);
+    }
+
     int o = 0;
 
     while (true) {
